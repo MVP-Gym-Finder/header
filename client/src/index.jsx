@@ -29,15 +29,18 @@ class Header extends React.Component {
             <div className="header-login">Account
               <div className="login-panel">
                 <h4>Login</h4>
-                <label className="login-username">Username:
+                <label className="login-email">Email:
                   <br></br>
-                  <input type="text" name="username"></input>
+                  <input type="text" name="email"></input>
                 </label>
                 <label className="login-pswd">Password:
                   <br></br>
                   <input type="password" name="password"></input>
                 </label>
-                <button>Login</button>
+                <div className="login-panel-btns">
+                  <button className="login-login">Login</button>
+                  <button className="login-signup">Sign Up</button>
+                </div>
               </div>
             </div>
           }
