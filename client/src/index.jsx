@@ -1,5 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+// const firebase = require('firebase/app');
+require('firebase/auth');
+// const firebaseui = require('firebaseui');
 
 
 class Header extends React.Component {
@@ -7,13 +10,102 @@ class Header extends React.Component {
     super(props);
 
     this.state = {
+      showLogin: { display: 'none'},
       isLoggedIn: false,
+      isSigningUp: false,
+      email: '',
+      password: '',
+      passwordCheck: '',
+      passwordMismatch: false,
     };
+
+    this.changeHandler = this.changeHandler.bind(this);
+    this.toggleLogin = this.toggleLogin.bind(this);
+    this.loginHandler = this.loginHandler.bind(this);
+    this.signupHandler = this.signupHandler.bind(this);
+    this.createAccountHandler = this.createAccountHandler.bind(this);
+    this.cancelHandler = this.cancelHandler.bind(this);
+    this.logoutHandler = this.logoutHandler.bind(this);
+  }
+
+  changeHandler(e) {
+    this.setState({
+      [e.target.id]: e.target.value
+    });
+  }
+
+  toggleLogin() {
+    this.setState((prevState) => {
+      if (prevState.showLogin.display === 'none') {
+        return { showLogin: { display: 'block'} };
+      } else {
+        return { showLogin: { display: 'none'} };
+      }
+    })
   }
 
   loginHandler(e) {
     e.preventDefault();
+    firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+      .then(() => {
+        this.setState({
+          isLoggedIn: true,
+          email: '',
+          password: '',
+        });
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+      })
+      .catch((error) => alert('Error logging in: ', error.message));
+  }
 
+  signupHandler(e) {
+    e.preventDefault();
+    this.setState({
+      isSigningUp: true
+    });
+  }
+
+  createAccountHandler(e) {
+    e.preventDefault();
+    if (this.state.password === this.state.passwordCheck) {
+      firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+        .then(() => {
+          this.setState({
+            passwordMismatch: false,
+            isLoggedIn: true,
+            email: '',
+            password: '',
+            passwordCheck: '',
+          });
+          document.getElementById('email').value = '';
+          document.getElementById('password').value = '';
+          document.getElementById('passwordCheck').value = '';
+        })
+        .catch((error) => alert('Error creating account:', error.message));
+    } else {
+      this.setState({
+        passwordMismatch: true,
+      });
+    }
+  }
+
+  cancelHandler(e) {
+    e.preventDefault();
+    this.setState({
+      isSigningUp: false
+    });
+  }
+
+  logoutHandler(e) {
+    e.preventDefault();
+    firebase.auth().signOut()
+      .then(() => {
+        this.setState({
+          isLoggedIn: false
+        });
+      })
+      .catch((error) => alert('Error signing out: ', error.message));
   }
 
   render() {
@@ -26,22 +118,44 @@ class Header extends React.Component {
           <div className="header-home">Home</div>
           {this.state.isLoggedIn ? 
             <div className="header-account">Account</div> :
-            <div className="header-login">Account
-              <div className="login-panel">
-                <h4>Login</h4>
+            <div className="header-login"> <span onClick={this.toggleLogin}>Account</span>
+              {this.state.isSigningUp ? 
+              <div className="login-panel" style={this.state.showLogin}>
+                <h4>Create Account</h4>
                 <label className="login-email">Email:
                   <br></br>
-                  <input type="text" name="email"></input>
+                  <input type="text" id="email" onChange={this.changeHandler}></input>
                 </label>
                 <label className="login-pswd">Password:
                   <br></br>
-                  <input type="password" name="password"></input>
+                  <input type="password" id="password" onChange={this.changeHandler}></input>
+                </label>
+                <label className="login-pswd-check">Confirm Password:
+                  <br></br>
+                  <input type="password" id="passwordCheck" onChange={this.changeHandler}></input>
                 </label>
                 <div className="login-panel-btns">
-                  <button className="login-login">Login</button>
-                  <button className="login-signup">Sign Up</button>
+                  <button className="login-create-account" onClick={this.createAccountHandler}>Create Account</button>
+                  <button className="login-cancel-create" onClick={this.cancelHandler}>Cancel</button>
                 </div>
               </div>
+              :
+              <div className="login-panel" style={this.state.showLogin}>
+                <h4>Login</h4>
+                <label className="login-email">Email:
+                  <br></br>
+                  <input type="text" id="email" onChange={this.changeHandler}></input>
+                </label>
+                <label className="login-pswd">Password:
+                  <br></br>
+                  <input type="password" id="password" onChange={this.changeHandler}></input>
+                </label>
+                <div className="login-panel-btns">
+                  <button className="login-login" onClick={this.loginHandler}>Login</button>
+                  <button className="login-signup" onClick={this.signupHandler}>Sign Up</button>
+                </div>
+              </div>
+              }
             </div>
           }
         </div>
