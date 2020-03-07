@@ -119,3 +119,15 @@ Layout/Spacing
 .header-login:hover .login-panel {
   display: block;
 }
+
+.account-panel-profile {
+  margin: 16px 0 12px 7px;
+}
+
+.account-panel-settings {
+  margin: 16px 0 12px 7px;
+}
+
+.signout-btn {
+  margin: 0 0 7px 7px;
+}

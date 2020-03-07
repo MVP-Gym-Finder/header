@@ -20,7 +20,7 @@ class Header extends React.Component {
     };
 
     this.changeHandler = this.changeHandler.bind(this);
-    this.toggleLogin = this.toggleLogin.bind(this);
+    this.toggleDropdown = this.toggleDropdown.bind(this);
     this.loginHandler = this.loginHandler.bind(this);
     this.signupHandler = this.signupHandler.bind(this);
     this.createAccountHandler = this.createAccountHandler.bind(this);
@@ -34,19 +34,20 @@ class Header extends React.Component {
     });
   }
 
-  toggleLogin() {
+  toggleDropdown() {
     this.setState((prevState) => {
       if (prevState.showLogin.display === 'none') {
         return { showLogin: { display: 'block'} };
       } else {
         return { showLogin: { display: 'none'} };
       }
-    })
+    });
   }
 
   loginHandler(e) {
     e.preventDefault();
     firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+      .catch((error) => alert('Error logging in: ', error.message))
       .then(() => {
         this.setState({
           isLoggedIn: true,
@@ -55,8 +56,7 @@ class Header extends React.Component {
         });
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
-      })
-      .catch((error) => alert('Error logging in: ', error.message));
+      });
   }
 
   signupHandler(e) {
@@ -70,6 +70,7 @@ class Header extends React.Component {
     e.preventDefault();
     if (this.state.password === this.state.passwordCheck) {
       firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+        .catch((error) => alert('Error creating account:', error.message))
         .then(() => {
           this.setState({
             passwordMismatch: false,
@@ -81,8 +82,7 @@ class Header extends React.Component {
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
           document.getElementById('passwordCheck').value = '';
-        })
-        .catch((error) => alert('Error creating account:', error.message));
+        });
     } else {
       this.setState({
         passwordMismatch: true,
@@ -117,8 +117,14 @@ class Header extends React.Component {
         <div className="header-nav">
           <div className="header-home">Home</div>
           {this.state.isLoggedIn ? 
-            <div className="header-account">Account</div> :
-            <div className="header-login"> <span onClick={this.toggleLogin}>Account</span>
+            <div className="header-account"> <span onClick={this.toggleDropdown}>Account</span>
+              <div className="login-panel" style={this.state.showLogin}>
+                <div className="account-panel-profile">Profile</div>
+                <div className="account-panel-settings">Settings</div>
+                <button className="signout-btn" onClick={this.logoutHandler}>Sign Out</button>
+              </div>
+            </div> :
+            <div className="header-login"> <span onClick={this.toggleDropdown}>Account</span>
               {this.state.isSigningUp ? 
               <div className="login-panel" style={this.state.showLogin}>
                 <h4>Create Account</h4>
